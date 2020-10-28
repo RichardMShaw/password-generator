@@ -35,8 +35,6 @@ function replaceValidChar(str, chars, charBound, charType, tally) {
     let charCodeType = getCharCodeType(charCode)
     if (tally[charCodeType] > 1) {
       let randChar = Math.floor(Math.random() * (charBound[charType][1] - charBound[charType][0])) + charBound[charType][0]
-      console.log(chars[randChar])
-      console.log(validIndexs[randNum])
       return str.substr(0, validIndexs[randNum]) + String.fromCharCode(chars[randChar]) + str.substr(validIndexs[randNum] + 1);
 
     } else {
@@ -44,6 +42,8 @@ function replaceValidChar(str, chars, charBound, charType, tally) {
       len--;
     }
   }
+
+  console.log(`Valid character to replace could not be found. This shouldn't be possible.`)
 }
 
 function generatePassword() {
@@ -116,7 +116,6 @@ function generatePassword() {
     charBound[3][1] = chars.length;
   }
   let charsLen = chars.length;
-  let validIndexs = [];
   let tally = [0, 0, 0, 0];
   let randNum = 0;
   let password = "";
