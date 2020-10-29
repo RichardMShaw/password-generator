@@ -10,7 +10,7 @@ const CHAR_TYPE = {
 
 
 
-function getCharCodeType(charCode) {
+const getCharCodeType = (charCode) => {
 
   if (96 < charCode && charCode < 123) {
     return CHAR_TYPE.LOWER;
@@ -21,29 +21,6 @@ function getCharCodeType(charCode) {
   } else {
     return CHAR_TYPE.SPECIAL;
   }
-}
-
-function replaceValidChar(str, chars, charBound, charType, tally) {
-  let len = str.length
-  let validIndexs = []
-  for (var i = 0; i < len; i++) {
-    validIndexs.push(i)
-  }
-  while (len > 0) {
-    let randNum = Math.floor(Math.random() * validIndexs.length)
-    let charCode = str.charCodeAt(validIndexs[randNum]);
-    let charCodeType = getCharCodeType(charCode)
-    if (tally[charCodeType] > 1) {
-      let randChar = Math.floor(Math.random() * (charBound[charType][1] - charBound[charType][0])) + charBound[charType][0]
-      return str.substr(0, validIndexs[randNum]) + String.fromCharCode(chars[randChar]) + str.substr(validIndexs[randNum] + 1);
-
-    } else {
-      validIndexs.splice(randNum, 1);
-      len--;
-    }
-  }
-
-  console.log(`Valid character to replace could not be found. This shouldn't be possible.`)
 }
 
 function generatePassword() {
@@ -58,18 +35,15 @@ function generatePassword() {
       valid = true;
     }
   }
-  let lower = false;
-  let upper = false;
-  let number = false;
-  let special = false;
+  let types = [false, false, false, false]
 
   valid = false;
   while (!valid) {
-    lower = confirm(`Lowercase characters?`)
-    upper = confirm(`Uppercase characters?`)
-    number = confirm(`Numeric characters?`)
-    special = confirm(`Special characters?`)
-    if (lower || upper || number || special) {
+    types[CHAR_TYPE.LOWER] = confirm(`Lowercase characters?`)
+    types[CHAR_TYPE.UPPER] = confirm(`Uppercase characters?`)
+    types[CHAR_TYPE.NUMBER] = confirm(`Numeric characters?`)
+    types[CHAR_TYPE.SPECIAL] = confirm(`Special characters?`)
+    if (types[0] || types[1] || types[2] || types[3]) {
       valid = true;
     } else {
       alert(`You must select at least one type.`)
@@ -78,28 +52,28 @@ function generatePassword() {
 
   let chars = []
   let charBound = [[0, 0], [0, 0], [0, 0], [0, 0]];
-  if (lower) {
+  if (types[CHAR_TYPE.LOWER]) {
     for (let i = 97; i < 123; i++) {
       charBound[0][0] = chars.length;
       chars.push(i);
       charBound[0][1] = chars.length
     }
   }
-  if (upper) {
+  if (types[CHAR_TYPE.UPPER]) {
     for (let i = 65; i < 91; i++) {
       charBound[1][0] = chars.length;
       chars.push(i);
       charBound[1][1] = chars.length;
     }
   }
-  if (number) {
+  if (types[CHAR_TYPE.NUMBER]) {
     for (let i = 48; i < 58; i++) {
       charBound[2][0] = chars.length;
       chars.push(i);
       charBound[2][1] = chars.length;
     }
   }
-  if (special) {
+  if (types[CHAR_TYPE.SPECIAL]) {
     charBound[3][0] = chars.length;
     for (let i = 126; i > 122; i--) {
       chars.push(i);
@@ -127,15 +101,29 @@ function generatePassword() {
     password += String.fromCharCode(chars[randNum])
   }
 
-  if (lower && tally[0] === 0) {
-    password = replaceValidChar(password, chars, charBound, 0, tally)
-  } else if (upper && tally[1] === 0) {
-    password = replaceValidChar(password, chars, charBound, 1, tally)
-  } else if (number && tally[2] === 0) {
-    password = replaceValidChar(password, chars, charBound, 2, tally)
-  } else if (special && tally[3] === 0) {
-    password = replaceValidChar(password, chars, charBound, 3, tally)
+  for (let i = 0; i < 4; i++) {
+    if (types[i] && tally[i] === 0) {
+      let validIndexs = []
+      for (let j = 0; j < passwordLen; j++) {
+        validIndexs.push(j)
+      }
+      for (let j = passwordLen; j > 0; j--) {
+        let randNum = Math.floor(Math.random() * j)
+        let charCode = password.charCodeAt(validIndexs[randNum]);
+        let charCodeType = getCharCodeType(charCode)
+        if (tally[charCodeType] > 1) {
+          let randChar = Math.floor(Math.random() * (charBound[i][1] - charBound[i][0])) + charBound[i][0]
+          password = password.substr(0, validIndexs[randNum]) + String.fromCharCode(chars[randChar]) + password.substr(validIndexs[randNum] + 1)
+          tally[i]++
+          j = 0;
+
+        } else {
+          validIndexs.splice(randNum, 1);
+        }
+      }
+    }
   }
+
   return password
 
 
